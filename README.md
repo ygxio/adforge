@@ -8,6 +8,12 @@ Built for the CreateOS × Stripe Projects Hackathon (Oct 17, 2026).
 
 <p align="center"><i>Both ads above were written as Blender code by the agent and rendered inside a CreateOS sandbox.</i></p>
 
+## Demo
+
+![AdForge demo](docs/demo.gif)
+
+Full-quality video: [`docs/demo.mp4`](docs/demo.mp4). Animated ad loop rendered in the sandbox: [`docs/hero-loop.gif`](docs/hero-loop.gif).
+
 ## The problem
 
 Small brands and indie sellers need scroll-stopping product creative, but 3D ads mean hiring a motion designer or learning Blender. And even a great ad usually dead-ends: the viewer still has to go find where to buy.
