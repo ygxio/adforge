@@ -26,7 +26,9 @@ export async function listProducts() {
 
 // Use an existing price, or create the product + price from the form input.
 export async function resolveProduct({ priceId, name, description, price }) {
-  if (!stripe) return { name, description, price: price ? `$${price}` : "", image: null, priceId: null };
+  if (!stripe || (!priceId && !(parseFloat(String(price).replace(/[^0-9.]/g, "")) > 0))) {
+    return { name, description, price: price ? `$${price}` : "", image: null, priceId: null };
+  }
   if (priceId) {
     const p = await stripe.prices.retrieve(priceId, { expand: ["product"] });
     return { priceId, name: p.product.name, description: p.product.description || "", image: p.product.images?.[0] || null, price: money(p.unit_amount, p.currency) };
