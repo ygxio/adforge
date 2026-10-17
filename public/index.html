@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AdForge Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #08080c; --panel: #101017; --panel2: #16161f; --panel3: #1d1d28; --line: #23232f; --text: #ededf5; --muted: #80809a;
+    --accent: #8b6cff; --accent2: #ff4fa3; --ok: #3ddc97; --warn: #ffb547; --err: #ff5d6c;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.5 Inter, system-ui, sans-serif; display: flex; flex-direction: column; overflow: hidden; }
+  /* top bar */
+  header { height: 52px; flex: none; display: flex; align-items: center; gap: 14px; padding: 0 18px; border-bottom: 1px solid var(--line); background: var(--panel); }
+  .logo { width: 26px; height: 26px; border-radius: 8px; background: conic-gradient(from 200deg, var(--accent), var(--accent2), #ffb547, var(--accent)); box-shadow: 0 0 20px #8b6cff55; }
+  header h1 { font-size: 15px; margin: 0; font-weight: 800; letter-spacing: -0.02em; }
+  header h1 span { color: var(--muted); font-weight: 500; }
+  .crumbs { color: var(--muted); font-size: 12px; padding-left: 14px; border-left: 1px solid var(--line); }
+  .crumbs b { color: var(--text); font-weight: 600; }
+  .badges { margin-left: auto; display: flex; gap: 8px; }
+  .badge { font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 99px; padding: 3px 10px; display: flex; align-items: center; gap: 6px; }
+  .badge i { width: 6px; height: 6px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+  /* layout */
+  .studio { flex: 1; min-height: 0; display: grid; grid-template-columns: 320px 1fr 340px; grid-template-rows: 1fr 230px; }
+  aside, .inspector { background: var(--panel); overflow-y: auto; }
+  aside { border-right: 1px solid var(--line); grid-row: 1 / 3; padding: 16px; }
+  .inspector { border-left: 1px solid var(--line); grid-row: 1 / 3; grid-column: 3; display: flex; flex-direction: column; }
+  .sec { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); font-weight: 700; margin: 18px 0 8px; display: flex; align-items: center; gap: 8px; }
+  .sec:first-child { margin-top: 0; }
+  .sec::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  label { display: block; font-size: 11.5px; color: var(--muted); margin: 10px 0 5px; }
+  input, select, textarea { width: 100%; background: var(--panel2); border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 8px 10px; font: inherit; }
+  textarea { resize: vertical; min-height: 54px; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); background: var(--panel3); }
+  .row { display: flex; gap: 8px; } .row > * { flex: 1; }
+  .or { text-align: center; color: var(--muted); font-size: 11px; margin: 10px 0 0; }
+  /* shape picker */
+  .shapes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .shapes button { background: var(--panel2); border: 1px solid var(--line); color: var(--muted); border-radius: 9px; padding: 8px 0 6px; font: 600 10.5px Inter; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .shapes button svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+  .shapes button.on, .shapes button:hover { color: var(--text); border-color: var(--accent); background: #8b6cff14; }
+  /* style presets */
+  .presets { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .preset { border: 1px solid var(--line); border-radius: 9px; padding: 8px; cursor: pointer; font-size: 11.5px; font-weight: 600; display: flex; align-items: center; gap: 8px; background: var(--panel2); }
+  .preset .sw { width: 22px; height: 22px; border-radius: 6px; flex: none; }
+  .preset.on, .preset:hover { border-color: var(--accent); }
+  .formats { display: flex; gap: 6px; }
+  .formats button { flex: 1; background: var(--panel2); border: 1px solid var(--line); color: var(--muted); border-radius: 8px; padding: 7px; font: 600 11.5px Inter; cursor: pointer; }
+  .formats button.on { color: var(--text); border-color: var(--accent); background: #8b6cff14; }
+  button.go { margin-top: 18px; width: 100%; padding: 12px; border: 0; border-radius: 10px; font: 700 14px Inter; color: white; cursor: pointer; letter-spacing: 0.01em;
+    background: linear-gradient(135deg, var(--accent), var(--accent2)); box-shadow: 0 10px 30px #8b6cff40; }
+  button.go:disabled { opacity: 0.55; cursor: wait; }
+  /* canvas */
+  .canvas { position: relative; display: grid; place-items: center; padding: 26px; min-width: 0; min-height: 0;
+    background: radial-gradient(circle at 50% 40%, #191926 0, #0b0b10 70%); }
+  .canvas::before { content: ""; position: absolute; inset: 0; opacity: 0.35; pointer-events: none;
+    background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 32px 32px;
+    mask-image: radial-gradient(circle at 50% 50%, black, transparent 75%); }
+  .artboard { position: relative; height: 100%; max-height: 100%; aspect-ratio: 1; max-width: 100%; border-radius: 6px; overflow: hidden;
+    background: repeating-conic-gradient(#15151d 0 25%, #111118 0 50%) 0 0 / 24px 24px; box-shadow: 0 30px 80px #000a, 0 0 0 1px var(--line); display: grid; place-items: center; color: var(--muted); }
+  .artboard img, .artboard video { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .artboard .ph { text-align: center; font-size: 13px; } .artboard .ph b { display: block; color: var(--text); font-size: 18px; margin-bottom: 4px; }
+  .artlabel { position: absolute; top: 12px; left: 16px; font-size: 11px; color: var(--muted); z-index: 1; }
+  .artlabel b { color: var(--text); }
+  .rendering { position: absolute; inset: 0; display: none; place-items: center; background: #08080caa; backdrop-filter: blur(2px); font-weight: 600; z-index: 2; }
+  .rendering.on { display: grid; }
+  .spinner { width: 34px; height: 34px; border-radius: 50%; border: 3px solid #ffffff22; border-top-color: var(--accent2); animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .downloads { position: absolute; bottom: 14px; right: 18px; display: flex; gap: 6px; z-index: 1; }
+  .downloads a { color: var(--text); background: #000a; border: 1px solid var(--line); border-radius: 8px; padding: 6px 11px; text-decoration: none; font-size: 12px; font-weight: 600; backdrop-filter: blur(6px); }
+  /* bottom dock */
+  .dock { grid-column: 2; border-top: 1px solid var(--line); background: var(--panel); display: grid; grid-template-rows: auto 1fr; min-height: 0; }
+  .steps { display: flex; gap: 0; padding: 10px 14px 8px; border-bottom: 1px solid var(--line); }
+  .step { flex: 1; position: relative; font-size: 11px; color: var(--muted); padding-top: 12px; text-align: center; }
+  .step::before { content: ""; position: absolute; top: 3px; left: 0; right: 0; height: 2px; background: var(--line); }
+  .step::after { content: ""; position: absolute; top: 0; left: 50%; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: var(--panel3); border: 1px solid var(--line); }
+  .step b { color: var(--text); font-weight: 600; }
+  .step.done::before { background: var(--ok); } .step.done::after { background: var(--ok); border-color: var(--ok); }
+  .step.active::before { background: linear-gradient(90deg, var(--ok), var(--accent)); }
+  .step.active::after { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px var(--accent); animation: pulse 1s infinite; }
+  .step.active b { color: var(--accent); }
+  @keyframes pulse { 50% { opacity: 0.35; } }
+  .term { overflow: auto; padding: 8px 14px; font: 11.5px/1.6 "JetBrains Mono", monospace; white-space: pre-wrap; word-break: break-word; }
+  .term .l { color: #c8c8da; } .term .s { color: #5f5f78; } .term .e { color: var(--err); } .term .c { color: var(--warn); } .term .ok { color: var(--ok); }
+  /* inspector */
+  .ipanel { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .ipanel.grow { flex: 1; display: flex; flex-direction: column; min-height: 260px; }
+  .critique { font-size: 12.5px; color: var(--muted); }
+  .critique.has { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; color: var(--text); }
+  .score { font-size: 24px; font-weight: 800; }
+  .drafts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+  .drafts figure { margin: 0; } .drafts img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 7px; border: 1px solid var(--line); cursor: pointer; display: block; }
+  .drafts img:hover { border-color: var(--accent); }
+  .drafts figcaption { font-size: 10.5px; color: var(--muted); text-align: center; margin-top: 2px; }
+  .buy { display: none; padding: 12px; border-radius: 10px; background: #3ddc9712; border: 1px solid #3ddc9740; font-size: 12px; }
+  .buy b { color: var(--ok); }
+  .buy a { color: var(--text); word-break: break-all; font-size: 11.5px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap; }
+  .tabs button { background: var(--panel2); border: 1px solid var(--line); color: var(--muted); border-radius: 6px; padding: 2px 8px; font: 600 11px Inter; cursor: pointer; }
+  .tabs button.on { color: var(--text); border-color: var(--accent); }
+  pre.code { flex: 1; margin: 0; background: #06060a; border: 1px solid var(--line); border-radius: 9px; overflow: auto; padding: 10px; font: 11px/1.5 "JetBrains Mono", monospace; color: #cfd3ff; min-height: 200px; }
+  .empty { color: var(--muted); }
+  @media (max-width: 1100px) {
+    body { overflow: auto; } .studio { display: block; } aside, .inspector { border: 0; }
+    .canvas { height: 70vh; } .dock { height: 280px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"></div>
+  <h1>AdForge <span>Studio</span></h1>
+  <div class="crumbs">Agent writes Blender code → renders in a <b>CreateOS</b> sandbox → sells with <b>Stripe</b></div>
+  <div class="badges">
+    <span class="badge"><i></i>CreateOS sandbox</span>
+    <span class="badge"><i></i>Stripe</span>
+  </div>
+</header>
+<div class="studio">
+  <aside>
+    <div class="sec">Product</div>
+    <label>From your Stripe catalog</label>
+    <select id="product"><option value="">Loading catalog…</option></select>
+    <p class="or">or create a new one</p>
+    <div class="row">
+      <div><label>Brand / product</label><input id="name" placeholder="Nova Cold Brew"></div>
+      <div style="flex:0 0 76px"><label>Price $</label><input id="price" placeholder="12"></div>
+    </div>
+    <label>Tagline / description</label>
+    <input id="description" placeholder="Nitro cold brew, 12oz can">
+    <label>Label / logo image URL</label>
+    <input id="imageUrl" placeholder="https://… (optional)">
+
+    <div class="sec">Shape</div>
+    <input type="hidden" id="shape">
+    <div class="shapes" id="shapes">
+      <button data-v="" class="on"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.5-.8z"/></svg>Auto</button>
+      <button data-v="can"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="6" ry="2"/><path d="M6 5v14c0 1.1 2.7 2 6 2s6-.9 6-2V5"/></svg>Can</button>
+      <button data-v="bottle"><svg viewBox="0 0 24 24"><path d="M10 2h4v4l2 3v12a1 1 0 01-1 1H9a1 1 0 01-1-1V9l2-3z"/></svg>Bottle</button>
+      <button data-v="box"><svg viewBox="0 0 24 24"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/></svg>Box</button>
+      <button data-v="card"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 15l3-3 2 2 3-4"/></svg>Card</button>
+    </div>
+
+    <div class="sec">Style</div>
+    <div class="presets" id="presets"></div>
+    <label>Art direction</label>
+    <textarea id="vibe" placeholder="dark, moody, warm amber rim light, floating coffee beans"></textarea>
+
+    <div class="sec">Output</div>
+    <input type="checkbox" id="animate" hidden>
+    <div class="formats" id="formats">
+      <button data-a="0" class="on">Still · 1080²</button>
+      <button data-a="1">Loop · MP4/GIF</button>
+    </div>
+    <button class="go" id="go">✦ Generate ad</button>
+  </aside>
+
+  <section class="canvas">
+    <div class="artlabel" id="artlabel">Artboard · <b>1080 × 1080</b></div>
+    <div class="artboard" id="hero"><div class="ph"><b>Your ad renders here</b>Describe a product and hit Generate</div></div>
+    <div class="rendering" id="rendering"><div><div class="spinner"></div><span id="rendmsg">Agent at work…</span></div></div>
+    <div class="downloads" id="downloads"></div>
+  </section>
+
+  <section class="dock">
+    <div class="steps" id="steps"></div>
+    <div class="term" id="term"><span class="s">Sandbox and agent logs stream here.</span></div>
+  </section>
+
+  <section class="inspector">
+    <div class="ipanel">
+      <div class="sec">Art director</div>
+      <div id="critique" class="critique">The agent renders a fast draft, a vision model critiques it, then the agent rewrites its own scene code.</div>
+      <div class="drafts" id="drafts"></div>
+    </div>
+    <div class="ipanel" id="buywrap">
+      <div class="buy" id="buy"><b>● Shoppable ad</b><br>Stripe Payment Link baked in as a QR:<br><a id="buylink" target="_blank"></a></div>
+      <div class="empty" id="buyempty" style="font-size:12px">A Stripe Payment Link QR is composited onto every ad.</div>
+    </div>
+    <div class="ipanel grow">
+      <div class="sec">Code the agent wrote</div>
+      <div class="tabs" id="tabs"></div>
+      <pre class="code" id="code"># Blender Python appears here, version by version</pre>
+    </div>
+  </section>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+const STEPS = [["stripe", "Stripe", "product + link"], ["sandbox", "Sandbox", "CreateOS VM"], ["write", "Write", "LLM → bpy code"],
+  ["draft", "Run", "draft render"], ["critique", "Review", "vision critic"], ["render", "Render", "final quality"], ["composite", "Ship", "QR + export"]];
+const PRESETS = [
+  ["Moody amber", "linear-gradient(135deg,#1a1008,#c27a2c)", "dark & moody studio, warm amber rim light, glossy reflections"],
+  ["Clean studio", "linear-gradient(135deg,#f4f4f6,#c9cad3)", "clean minimal white studio, soft shadows, premium Apple-style"],
+  ["Neon night", "linear-gradient(135deg,#ff2fb2,#22e0ff)", "neon cyberpunk, magenta and cyan rim lights, dark glossy floor, glowing rings"],
+  ["Black & gold", "linear-gradient(135deg,#0b0b0b,#d4a94a)", "luxury black and gold, metallic accents, dramatic spotlight"],
+  ["Pastel pop", "linear-gradient(135deg,#ffc6e0,#b8c8ff)", "playful pastel colors, floating spheres and tori, soft bright light"],
+  ["Fresh green", "linear-gradient(135deg,#d9f5df,#2f8f5b)", "fresh and natural, soft greens, morning light, organic shapes"]];
+
+$("steps").innerHTML = STEPS.map(([k, t, s]) => `<div class="step" data-k="${k}"><b>${t}</b><br>${s}</div>`).join("");
+$("presets").innerHTML = PRESETS.map(([n, g], i) => `<div class="preset" data-i="${i}"><span class="sw" style="background:${g}"></span>${n}</div>`).join("");
+$("presets").onclick = (e) => {
+  const el = e.target.closest(".preset"); if (!el) return;
+  document.querySelectorAll(".preset").forEach((p) => p.classList.toggle("on", p === el));
+  $("vibe").value = PRESETS[el.dataset.i][2];
+};
+$("shapes").onclick = (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  [...$("shapes").children].forEach((x) => x.classList.toggle("on", x === b));
+  $("shape").value = b.dataset.v;
+};
+$("formats").onclick = (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  [...$("formats").children].forEach((x) => x.classList.toggle("on", x === b));
+  $("animate").checked = b.dataset.a === "1";
+  $("artlabel").innerHTML = $("animate").checked ? "Artboard · <b>540 × 540 · 48-frame loop</b>" : "Artboard · <b>1080 × 1080</b>";
+};
+const RMSG = { stripe: "Creating Stripe product & Payment Link…", sandbox: "Waking the CreateOS sandbox…", write: "Agent is writing Blender code…",
+  draft: "Rendering draft in the sandbox…", critique: "Art director is reviewing the draft…", render: "Final render in the sandbox…", composite: "Compositing scan-to-buy QR…" };
+const busy = (on, msg) => { $("rendering").classList.toggle("on", on); if (msg) $("rendmsg").textContent = msg; };
+
+fetch("/api/products").then((r) => r.json()).then((ps) => {
+  $("product").innerHTML = `<option value="">${ps.length ? "— New product —" : "— No Stripe products (or no key) —"}</option>` +
+    ps.map((p) => `<option value="${p.priceId}">${p.name} · ${p.price}</option>`).join("");
+});
+
+const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+function term(text, cls = "l") {
+  const t = $("term");
+  const stick = t.scrollTop + t.clientHeight >= t.scrollHeight - 30;
+  t.insertAdjacentHTML("beforeend", `<div class="${cls}">${esc(text)}</div>`);
+  if (stick) t.scrollTop = t.scrollHeight;
+}
+function setStep(k) {
+  // Steps before the active one are done; the loop can jump back (write → run → review → write).
+  const idx = STEPS.findIndex(([key]) => key === k);
+  document.querySelectorAll(".step").forEach((el, i) => {
+    el.classList.toggle("active", i === idx);
+    el.classList.toggle("done", i < idx);
+  });
+}
+const codes = [];
+function showCode(i) {
+  $("code").textContent = codes[i];
+  [...$("tabs").children].forEach((b, j) => b.classList.toggle("on", i === j));
+}
+
+let lastSample = 0;
+function handle(ev) {
+  switch (ev.type) {
+    case "log": term("› " + ev.msg); break;
+    case "step": setStep(ev.step); busy(true, RMSG[ev.step]); break;
+    case "sandbox":
+      if (/Sample \d+\//.test(ev.line)) { if (Date.now() - lastSample < 1500) return; lastSample = Date.now(); }
+      term(ev.line, /rror|Traceback/.test(ev.line) ? "e" : "s"); break;
+    case "error_trace": term("✗ script error → sent back to the model", "e"); break;
+    case "code":
+      codes.push(ev.code);
+      $("tabs").insertAdjacentHTML("beforeend", `<button>v${ev.attempt}</button>`);
+      { const i = codes.length - 1; $("tabs").lastChild.onclick = () => showCode(i); showCode(i); }
+      break;
+    case "image":
+      $("drafts").insertAdjacentHTML("beforeend", `<figure><img src="${ev.url}"><figcaption>${ev.label}</figcaption></figure>`);
+      $("drafts").lastChild.onclick = () => ($("hero").innerHTML = `<img src="${ev.url}">`);
+      $("hero").innerHTML = `<img src="${ev.url}">`; busy(false); break;
+    case "critique":
+      $("critique").className = "critique has";
+      $("critique").innerHTML = `<span class="score" style="color:${ev.score >= 8 ? "var(--ok)" : "var(--warn)"}">${ev.score}/10</span> art director<br>` +
+        (ev.issues || []).map((i) => "• " + esc(i)).join("<br>");
+      term(`Critic: ${ev.score}/10 — ${(ev.issues || []).join("; ")}`, "c"); break;
+    case "done":
+      document.querySelectorAll(".step").forEach((e) => { e.classList.remove("active"); e.classList.add("done"); });
+      $("hero").innerHTML = ev.video ? `<video src="${ev.video}" autoplay loop muted playsinline></video>` : `<img src="${ev.image}">`;
+      $("downloads").innerHTML = [["PNG", ev.image], ["MP4", ev.video], ["GIF", ev.gif]].filter(([, u]) => u)
+        .map(([n, u]) => `<a href="${u}" download>⬇ ${n}</a>`).join("");
+      busy(false);
+      if (ev.link) { $("buyempty").style.display = "none"; $("buy").style.display = "block"; $("buylink").href = ev.link; $("buylink").textContent = ev.link; }
+      term("✓ Ad shipped", "ok"); $("go").disabled = false; break;
+    case "error": term("✗ " + ev.msg, "e"); busy(false); $("go").disabled = false; break;
+  }
+}
+
+$("go").onclick = async () => {
+  const body = Object.fromEntries(["name", "price", "description", "imageUrl", "shape", "vibe"].map((k) => [k, $(k).value.trim()]));
+  body.priceId = $("product").value || undefined;
+  body.animate = $("animate").checked;
+  if (!body.priceId && !body.name) { $("name").focus(); $("name").style.borderColor = "var(--err)"; return; }
+  $("go").disabled = true;
+  $("term").innerHTML = ""; $("drafts").innerHTML = ""; $("tabs").innerHTML = ""; codes.length = 0;
+  $("buy").style.display = "none"; $("buyempty").style.display = ""; $("downloads").innerHTML = "";
+  $("critique").className = "critique"; $("critique").textContent = "Waiting for the first draft…"; busy(true, "Starting agent…");
+  document.querySelectorAll(".step").forEach((e) => e.classList.remove("active", "done"));
+  const { id, error } = await (await fetch("/api/jobs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })).json();
+  if (error) { term("✗ " + error, "e"); $("go").disabled = false; return; }
+  const es = new EventSource(`/api/jobs/${id}/events`);
+  es.onmessage = (m) => handle(JSON.parse(m.data));
+  es.onerror = () => es.close();
+};
+</script>
+</body>
+</html>
