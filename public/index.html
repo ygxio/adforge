@@ -299,6 +299,14 @@ $("go").onclick = async () => {
   es.onmessage = (m) => handle(JSON.parse(m.data));
   es.onerror = () => es.close();
 };
+// ?demo prefills a ready-to-run brief for live demos.
+if (new URLSearchParams(location.search).has("demo")) {
+  $("name").value = "Sunrise Kombucha";
+  $("price").value = "8";
+  $("description").value = "Sparkling ginger kombucha, small batch";
+  document.querySelector('#shapes [data-v="bottle"]').click();
+  document.querySelector('#presets .preset[data-i="5"]').click();
+}
 </script>
 </body>
 </html>

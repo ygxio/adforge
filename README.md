@@ -5,6 +5,11 @@
 </p>
 
 <p align="center">
+  <img src="docs/crossover.gif" width="720" alt="CreateOS x Stripe crossover, rendered by Blender in a CreateOS sandbox"><br>
+  <sub>Rendered with Blender inside a CreateOS sandbox · <a href="docs/crossover.mp4">MP4</a> · Live app: <a href="https://01m563baqecw9eg8gcbwv480vy-3000.app.sb.createos.sh">01m563baqecw9eg8gcbwv480vy-3000.app.sb.createos.sh</a></sub>
+</p>
+
+<p align="center">
   <img src="docs/demo.gif" width="720" alt="AdForge demo"><br>
   <a href="docs/demo.mp4"><b>Watch full video</b></a>
 </p>
